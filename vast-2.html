@@ -1,0 +1,3084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧘 Vastu Architect Pro - Complete Interactive Vastu Planner</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --secondary: #7C3AED;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --dark: #1F2937;
+            --light: #F9FAFB;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            padding: 20px;
+        }
+        
+        .app-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, var(--dark) 0%, #374151 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        /* MAIN CONTENT */
+        .main-content {
+            display: flex;
+            flex: 1;
+            min-height: 700px;
+        }
+        
+        /* LEFT PANEL - INPUTS & TOOLS */
+        .input-panel {
+            width: 420px;
+            background: var(--light);
+            padding: 20px;
+            border-right: 1px solid #E5E7EB;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* RIGHT PANEL - VISUALIZATION */
+        .visualization-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+            position: relative;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: auto;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #vastuCanvas {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: block;
+            cursor: move;
+            touch-action: none;
+        }
+        
+        /* TOOLBAR */
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            padding: 15px 20px;
+            background: white;
+            border-bottom: 1px solid #E5E7EB;
+            flex-wrap: wrap;
+        }
+        
+        .tool-btn {
+            padding: 10px 15px;
+            border: 2px solid #E5E7EB;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .tool-btn:hover {
+            border-color: var(--primary);
+            background: #EEF2FF;
+        }
+        
+        .tool-btn.active {
+            border-color: var(--primary);
+            background: #EEF2FF;
+            color: var(--primary);
+        }
+        
+        .tool-btn i {
+            font-size: 1.2rem;
+        }
+        
+        /* PLOT CONFIGURATION */
+        .plot-config {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #E5E7EB;
+        }
+        
+        .plot-config h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .config-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .config-item label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #6B7280;
+        }
+        
+        .config-item input,
+        .config-item select {
+            padding: 10px;
+            border: 2px solid #E5E7EB;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        /* BHK SELECTION */
+        .bhk-selection {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #E5E7EB;
+        }
+        
+        .bhk-options {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .bhk-option {
+            padding: 15px 5px;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            background: white;
+            font-weight: 600;
+        }
+        
+        .bhk-option:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .bhk-option.selected {
+            border-color: var(--primary);
+            background: #EEF2FF;
+            color: var(--primary);
+        }
+        
+        /* ROTATION CONTROLS */
+        .rotation-controls {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #E5E7EB;
+        }
+        
+        .rotation-slider {
+            width: 100%;
+            margin: 15px 0;
+            -webkit-appearance: none;
+            height: 6px;
+            background: #E5E7EB;
+            border-radius: 3px;
+            outline: none;
+        }
+        
+        .rotation-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+        
+        .rotation-value {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 10px;
+            color: var(--primary);
+        }
+        
+        /* COMPONENT LIBRARY */
+        .component-library {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #E5E7EB;
+        }
+        
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .component-item {
+            padding: 15px 5px;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            cursor: grab;
+            text-align: center;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .component-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .component-icon {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        /* CONTROL HANDLES */
+        .control-handle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .rotate-handle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--warning);
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 1000;
+            cursor: grab;
+        }
+        
+        /* ENTRANCE MARKER */
+        .entrance-marker {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: var(--success);
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            z-index: 1001;
+            cursor: move;
+        }
+        
+        .entrance-marker::after {
+            content: '🚪';
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+        }
+        
+        /* ANALYSIS REPORT */
+        .analysis-report {
+            background: white;
+            border-radius: 10px;
+            margin: 20px;
+            padding: 25px;
+            border: 2px solid #E5E7EB;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #E5E7EB;
+        }
+        
+        .report-score {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .score-display {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: conic-gradient(var(--success) 0% 85%, #E5E7EB 85% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .score-display::before {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        .score-value {
+            position: relative;
+            z-index: 1;
+            font-size: 1.4rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .rule-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .rule-item {
+            padding: 15px;
+            border-radius: 8px;
+            background: #F9FAFB;
+            border-left: 4px solid;
+            transition: all 0.3s;
+        }
+        
+        .rule-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .rule-item.violation {
+            border-left-color: var(--danger);
+            background: #FEF2F2;
+        }
+        
+        .rule-item.compliant {
+            border-left-color: var(--success);
+            background: #ECFDF5;
+        }
+        
+        .rule-item.warning {
+            border-left-color: var(--warning);
+            background: #FFFBEB;
+        }
+        
+        .rule-item .rule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .rule-item .rule-severity {
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        /* ZOOM CONTROLS */
+        .zoom-controls {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #E5E7EB;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-size: 1.2rem;
+        }
+        
+        .zoom-btn:hover {
+            border-color: var(--primary);
+            background: #EEF2FF;
+        }
+        
+        /* STATIC COMPASS */
+        .static-compass {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 120px;
+        }
+        
+        .compass-visual {
+            width: 100px;
+            height: 100px;
+            margin: 10px auto;
+            position: relative;
+        }
+        
+        /* RESIZE GUIDES */
+        .resize-guide {
+            position: absolute;
+            background: rgba(79, 70, 229, 0.1);
+            border: 1px dashed var(--primary);
+            pointer-events: none;
+            z-index: 50;
+        }
+        
+        /* QUICK ACTIONS */
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 8px 15px;
+            background: white;
+            border: 2px solid #E5E7EB;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            flex: 1;
+        }
+        
+        .action-btn:hover {
+            border-color: var(--primary);
+            background: #EEF2FF;
+        }
+        
+        /* AUTO ARRANGE BUTTON */
+        .auto-arrange-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        
+        .auto-arrange-btn:hover {
+            background: #4338CA;
+            transform: translateY(-2px);
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 1200px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .input-panel {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #E5E7EB;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .toolbar {
+                flex-wrap: wrap;
+            }
+            
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .bhk-options {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .component-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .header-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1><i class="fas fa-om"></i> Vastu Architect Pro - Complete Planner</h1>
+            <div class="header-controls">
+                <button class="tool-btn" onclick="savePlan()">
+                    <i class="fas fa-save"></i> Save Plan
+                </button>
+                <button class="tool-btn" onclick="loadPlan()">
+                    <i class="fas fa-folder-open"></i> Load Plan
+                </button>
+                <button class="tool-btn" onclick="exportReport()">
+                    <i class="fas fa-download"></i> Export Report
+                </button>
+                <button class="tool-btn" onclick="toggleGrid()">
+                    <i class="fas fa-th"></i> Grid
+                </button>
+                <button class="tool-btn" onclick="toggleAutoArrange()" id="autoArrangeBtn">
+                    <i class="fas fa-magic"></i> Auto Arrange
+                </button>
+            </div>
+        </div>
+        
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- LEFT PANEL: TOOLS & COMPONENTS -->
+            <div class="input-panel">
+                <!-- Plot Configuration -->
+                <div class="plot-config">
+                    <h3><i class="fas fa-ruler-combined"></i> Plot Configuration</h3>
+                    <div class="config-grid">
+                        <div class="config-item">
+                            <label>Plot Length (ft)</label>
+                            <input type="number" id="plotLength" min="10" max="500" value="60" onchange="updatePlotSize()">
+                        </div>
+                        <div class="config-item">
+                            <label>Plot Width (ft)</label>
+                            <input type="number" id="plotWidth" min="10" max="500" value="40" onchange="updatePlotSize()">
+                        </div>
+                        <div class="config-item">
+                            <label>Unit</label>
+                            <select id="unit" onchange="updatePlotSize()">
+                                <option value="feet">Feet</option>
+                                <option value="meters">Meters</option>
+                            </select>
+                        </div>
+                        <div class="config-item">
+                            <label>Total Area</label>
+                            <input type="text" id="totalArea" value="2400 sq.ft" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- BHK Selection -->
+                <div class="bhk-selection">
+                    <h3><i class="fas fa-home"></i> BHK Configuration</h3>
+                    <div class="bhk-options">
+                        <div class="bhk-option" data-bhk="1" onclick="selectBHK(1)">1 BHK</div>
+                        <div class="bhk-option selected" data-bhk="2" onclick="selectBHK(2)">2 BHK</div>
+                        <div class="bhk-option" data-bhk="3" onclick="selectBHK(3)">3 BHK</div>
+                        <div class="bhk-option" data-bhk="4" onclick="selectBHK(4)">4 BHK</div>
+                        <div class="bhk-option" data-bhk="5" onclick="selectBHK(5)">5 BHK</div>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="action-btn" onclick="addBedroom()">
+                            <i class="fas fa-plus"></i> Add Bedroom
+                        </button>
+                        <button class="action-btn" onclick="removeBedroom()">
+                            <i class="fas fa-minus"></i> Remove Bedroom
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Rotation Controls -->
+                <div class="rotation-controls">
+                    <h3><i class="fas fa-sync-alt"></i> Map Rotation</h3>
+                    <input type="range" class="rotation-slider" id="rotationSlider" min="0" max="360" value="0" oninput="rotateMap(this.value)">
+                    <div class="rotation-value">Rotation: <span id="rotationValue">0°</span></div>
+                    <div class="quick-actions">
+                        <button class="action-btn" onclick="rotateMap(0)">
+                            <i class="fas fa-compass"></i> North
+                        </button>
+                        <button class="action-btn" onclick="rotateMap(90)">
+                            <i class="fas fa-sun"></i> East
+                        </button>
+                        <button class="action-btn" onclick="rotateMap(180)">
+                            <i class="fas fa-compass"></i> South
+                        </button>
+                        <button class="action-btn" onclick="rotateMap(270)">
+                            <i class="fas fa-moon"></i> West
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Tool Selection -->
+                <div class="toolbar" style="border: none; padding: 0;">
+                    <button class="tool-btn active" data-tool="select" onclick="setTool('select')">
+                        <i class="fas fa-mouse-pointer"></i> Select
+                    </button>
+                    <button class="tool-btn" data-tool="drag" onclick="setTool('drag')">
+                        <i class="fas fa-arrows-alt"></i> Drag
+                    </button>
+                    <button class="tool-btn" data-tool="resize" onclick="setTool('resize')">
+                        <i class="fas fa-expand-alt"></i> Resize
+                    </button>
+                    <button class="tool-btn" data-tool="rotate" onclick="setTool('rotate')">
+                        <i class="fas fa-sync-alt"></i> Rotate
+                    </button>
+                    <button class="tool-btn" data-tool="entrance" onclick="setTool('entrance')">
+                        <i class="fas fa-door-open"></i> Entrance
+                    </button>
+                    <button class="tool-btn" data-tool="delete" onclick="setTool('delete')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+                
+                <!-- Component Library -->
+                <div class="component-library">
+                    <h3><i class="fas fa-shapes"></i> Add Components</h3>
+                    <div class="component-grid">
+                        <div class="component-item" data-type="bedroom" draggable="true">
+                            <span class="component-icon">🛏️</span>
+                            Bedroom
+                        </div>
+                        <div class="component-item" data-type="kitchen" draggable="true">
+                            <span class="component-icon">🍳</span>
+                            Kitchen
+                        </div>
+                        <div class="component-item" data-type="living" draggable="true">
+                            <span class="component-icon">🛋️</span>
+                            Living Room
+                        </div>
+                        <div class="component-item" data-type="bathroom" draggable="true">
+                            <span class="component-icon">🚽</span>
+                            Bathroom
+                        </div>
+                        <div class="component-item" data-type="pooja" draggable="true">
+                            <span class="component-icon">🛕</span>
+                            Pooja Room
+                        </div>
+                        <div class="component-item" data-type="study" draggable="true">
+                            <span class="component-icon">📚</span>
+                            Study
+                        </div>
+                        <div class="component-item" data-type="parking" draggable="true">
+                            <span class="component-icon">🚗</span>
+                            Parking
+                        </div>
+                        <div class="component-item" data-type="garden" draggable="true">
+                            <span class="component-icon">🌳</span>
+                            Garden
+                        </div>
+                        <div class="component-item" data-type="staircase" draggable="true">
+                            <span class="component-icon">🪜</span>
+                            Staircase
+                        </div>
+                        <div class="component-item" data-type="store" draggable="true">
+                            <span class="component-icon">📦</span>
+                            Store
+                        </div>
+                        <div class="component-item" data-type="dining" draggable="true">
+                            <span class="component-icon">🍽️</span>
+                            Dining
+                        </div>
+                        <div class="component-item" data-type="balcony" draggable="true">
+                            <span class="component-icon">🌇</span>
+                            Balcony
+                        </div>
+                    </div>
+                    <button class="auto-arrange-btn" onclick="autoArrangeComponents()">
+                        <i class="fas fa-magic"></i> Auto-Arrange Components
+                    </button>
+                </div>
+            </div>
+            
+            <!-- RIGHT PANEL: VISUALIZATION -->
+            <div class="visualization-panel">
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-weight: 600;">Tools:</span>
+                    </div>
+                    <div style="margin-left: auto; display: flex; gap: 10px;">
+                        <button class="tool-btn" onclick="undo()">
+                            <i class="fas fa-undo"></i> Undo
+                        </button>
+                        <button class="tool-btn" onclick="redo()">
+                            <i class="fas fa-redo"></i> Redo
+                        </button>
+                        <button class="tool-btn" onclick="clearSelection()">
+                            <i class="fas fa-times"></i> Clear Selection
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Canvas Container -->
+                <div class="canvas-container" id="canvasContainer">
+                    <canvas id="vastuCanvas"></canvas>
+                    
+                    <!-- Static Compass (Always shows North at top) -->
+                    <div class="static-compass">
+                        <div style="font-weight: bold; margin-bottom: 5px;">Compass (North is Up)</div>
+                        <div class="compass-visual" id="staticCompass"></div>
+                        <div style="text-align: center; font-size: 0.9rem; margin-top: 10px;">
+                            Plot Rotation: <span id="currentRotation">0°</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Zoom Controls -->
+                    <div class="zoom-controls">
+                        <div class="zoom-btn" onclick="zoomIn()">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="zoom-btn" onclick="zoomOut()">
+                            <i class="fas fa-minus"></i>
+                        </div>
+                        <div class="zoom-btn" onclick="resetView()">
+                            <i class="fas fa-expand"></i>
+                        </div>
+                        <div class="zoom-btn" onclick="fitToScreen()">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analysis Report -->
+                <div class="analysis-report">
+                    <div class="report-header">
+                        <div class="report-score">
+                            <div class="score-display">
+                                <div class="score-value" id="vastuScore">85</div>
+                            </div>
+                            <div>
+                                <h3>Vastu Analysis Report</h3>
+                                <p id="vastuStatus">Excellent - All elements balanced</p>
+                            </div>
+                        </div>
+                        <button class="tool-btn" onclick="toggleReport()">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="rule-list" id="ruleList">
+                        <!-- Rules will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==============================
+        // COMPLETE VASTU ARCHITECT PRO
+        // ==============================
+        
+        // Global Variables
+        let canvas, ctx;
+        let scale = 15; // pixels per foot
+        let offsetX = 0, offsetY = 0;
+        let zoom = 1;
+        let currentTool = 'select';
+        let selectedObject = null;
+        let isDragging = false;
+        let isRotating = false;
+        let isResizing = false;
+        let dragStartX, dragStartY;
+        let objects = [];
+        let entrance = null;
+        let gridVisible = true;
+        let mapRotation = 0;
+        let bhkCount = 2;
+        let plotWidth = 60; // feet
+        let plotLength = 40; // feet
+        let autoArrangeEnabled = true;
+        let history = [];
+        let historyIndex = -1;
+        let plotCenterX, plotCenterY;
+        
+        // Enhanced Vastu Rules Database with dynamic calculations
+        const vastuRules = {
+            kitchen: {
+                idealDirections: ['SE', 'E'],
+                avoidDirections: ['NE', 'SW', 'NW', 'N', 'S', 'W', 'Center'],
+                rules: [
+                    "Kitchen should be in Southeast (SE) or East (E) direction",
+                    "Cooking should face East",
+                    "Sink/water should be in Northeast corner of kitchen",
+                    "Avoid kitchen in Northeast or Southwest",
+                    "Gas stove should not be under beam",
+                    "No kitchen in center of house",
+                    "Avoid kitchen facing North"
+                ],
+                element: "fire",
+                priority: "high",
+                weight: 15
+            },
+            bedroom: {
+                master: {
+                    idealDirections: ['SW'],
+                    avoidDirections: ['NE', 'SE', 'E', 'Center'],
+                    rules: [
+                        "Master bedroom should be in Southwest (SW) for stability",
+                        "Bed should face East or South",
+                        "Avoid mirrors facing bed",
+                        "No toilet attached to Southwest side of bedroom",
+                        "Master bedroom should not be in Northeast or Southeast",
+                        "Avoid master bedroom in center of house"
+                    ],
+                    priority: "high",
+                    weight: 20
+                },
+                other: {
+                    idealDirections: ['S', 'W', 'NW'],
+                    avoidDirections: ['NE', 'SE', 'E', 'Center'],
+                    rules: [
+                        "Bedrooms should avoid Northeast and Southeast directions",
+                        "Children's bedroom in West or Northwest",
+                        "Guest bedroom in Northwest",
+                        "Avoid bedrooms in East direction",
+                        "No bedroom in center of house"
+                    ],
+                    priority: "medium",
+                    weight: 12
+                }
+            },
+            pooja: {
+                idealDirections: ['NE', 'E', 'N'],
+                avoidDirections: ['SW', 'SE', 'S', 'Center', 'BathroomAdjacent', 'KitchenAdjacent'],
+                rules: [
+                    "Pooja room should be in Northeast (NE) for positive energy",
+                    "Idols should face East or West",
+                    "No toilet above or below pooja room",
+                    "Keep clean and well-lit",
+                    "Pooja room should face East or North",
+                    "Avoid pooja room near bathroom or kitchen"
+                ],
+                element: "water",
+                priority: "high",
+                weight: 18
+            },
+            bathroom: {
+                idealDirections: ['NW', 'W', 'E', 'SE'],
+                avoidDirections: ['NE', 'SW', 'Center', 'KitchenAdjacent', 'PoojaAdjacent', 'NE_Corner'],
+                rules: [
+                    "Bathrooms should be in Northwest (NW), West (W), or East (E)",
+                    "Avoid bathrooms in Northeast, Southwest, or center",
+                    "Toilet seat should face North or South",
+                    "No bathroom in Southeast if kitchen is there",
+                    "Avoid bathroom near kitchen or pooja room",
+                    "Bathroom should not be in Northeast corner"
+                ],
+                element: "water",
+                priority: "medium",
+                weight: 15
+            },
+            living: {
+                idealDirections: ['N', 'NE', 'E', 'NW'],
+                avoidDirections: ['SW', 'SE', 'S', 'Center', 'BathroomAdjacent'],
+                rules: [
+                    "Living room should be in North, Northeast, or East",
+                    "Main door should open into living room",
+                    "Sitting should face North or East",
+                    "Heavy furniture in Southwest",
+                    "Avoid living room in Southwest or Southeast",
+                    "Living room should not face South"
+                ],
+                element: "air",
+                priority: "high",
+                weight: 12
+            },
+            entrance: {
+                idealDirections: ['N', 'NE', 'E'],
+                avoidDirections: ['S', 'SW', 'Center', 'SE', 'W', 'NW'],
+                rules: [
+                    "Main entrance should face North, Northeast, or East",
+                    "Avoid entrance facing South or Southwest",
+                    "Door should open clockwise",
+                    "No obstacles in front of entrance",
+                    "Entrance should not be in Southeast, West, or Northwest",
+                    "Entrance should be larger than other doors"
+                ],
+                priority: "critical",
+                weight: 25
+            },
+            staircase: {
+                idealDirections: ['S', 'SW', 'W'],
+                avoidDirections: ['NE', 'Center', 'N', 'E'],
+                rules: [
+                    "Staircase should be in South, Southwest, or West",
+                    "Avoid staircase in Northeast or center",
+                    "Clockwise staircase is auspicious",
+                    "Odd number of steps (except 13)",
+                    "Avoid staircase in North or East",
+                    "Staircase should not face main entrance"
+                ],
+                priority: "medium",
+                weight: 10
+            },
+            dining: {
+                idealDirections: ['W', 'E', 'NW'],
+                avoidDirections: ['NE', 'SW', 'Center', 'BathroomAdjacent'],
+                rules: [
+                    "Dining room should be in West, East, or Northwest",
+                    "Dining table should be square or rectangular",
+                    "Avoid dining room in Northeast or Southwest",
+                    "No dining room in center of house",
+                    "Avoid dining room near bathroom"
+                ],
+                priority: "medium",
+                weight: 8
+            },
+            store: {
+                idealDirections: ['NW', 'W', 'S'],
+                avoidDirections: ['NE', 'E', 'Center'],
+                rules: [
+                    "Store room should be in Northwest, West, or South",
+                    "Avoid store room in Northeast or East",
+                    "No store room in center of house"
+                ],
+                priority: "low",
+                weight: 5
+            },
+            elements: {
+                water: { idealDirections: ['NE'], avoid: ['SW'] },
+                fire: { idealDirections: ['SE'], avoid: ['NW'] },
+                air: { idealDirections: ['NW'], avoid: ['SE'] },
+                earth: { idealDirections: ['SW'], avoid: ['NE'] }
+            },
+            general: {
+                rules: [
+                    "North and East zones should be more open than South and West",
+                    "Heavy structures should be in South and West",
+                    "Open space should be more in North and East",
+                    "Slope of plot should be towards North or East",
+                    "Well/water source should be in Northeast",
+                    "Septic tank should be in Northwest"
+                ]
+            }
+        };
+        
+        // Object Types with configurations
+        const objectTypes = {
+            bedroom: { 
+                color: '#4ECDC4', 
+                vastuType: 'bedroom', 
+                icon: '🛏️',
+                defaultSize: { width: 15, height: 12 }
+            },
+            kitchen: { 
+                color: '#FFD166', 
+                vastuType: 'kitchen', 
+                icon: '🍳',
+                defaultSize: { width: 12, height: 10 }
+            },
+            living: { 
+                color: '#FF6B6B', 
+                vastuType: 'living', 
+                icon: '🛋️',
+                defaultSize: { width: 20, height: 16 }
+            },
+            bathroom: { 
+                color: '#45B7D1', 
+                vastuType: 'bathroom', 
+                icon: '🚽',
+                defaultSize: { width: 8, height: 6 }
+            },
+            pooja: { 
+                color: '#118AB2', 
+                vastuType: 'pooja', 
+                icon: '🛕',
+                defaultSize: { width: 10, height: 8 }
+            },
+            study: { 
+                color: '#7209B7', 
+                vastuType: 'study', 
+                icon: '📚',
+                defaultSize: { width: 12, height: 10 }
+            },
+            parking: { 
+                color: '#6B7280', 
+                vastuType: 'parking', 
+                icon: '🚗',
+                defaultSize: { width: 20, height: 12 }
+            },
+            garden: { 
+                color: '#2ECC71', 
+                vastuType: 'garden', 
+                icon: '🌳',
+                defaultSize: { width: 15, height: 15 }
+            },
+            staircase: { 
+                color: '#8B4513', 
+                vastuType: 'staircase', 
+                icon: '🪜',
+                defaultSize: { width: 10, height: 10 }
+            },
+            store: { 
+                color: '#A78BFA', 
+                vastuType: 'store', 
+                icon: '📦',
+                defaultSize: { width: 10, height: 8 }
+            },
+            dining: { 
+                color: '#F472B6', 
+                vastuType: 'dining', 
+                icon: '🍽️',
+                defaultSize: { width: 14, height: 12 }
+            },
+            balcony: { 
+                color: '#FBBF24', 
+                vastuType: 'balcony', 
+                icon: '🌇',
+                defaultSize: { width: 8, height: 6 }
+            }
+        };
+        
+        // Initialize
+        function init() {
+            canvas = document.getElementById('vastuCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Setup canvas
+            setupCanvas();
+            
+            // Create initial plot
+            createPlot();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Create default components based on BHK
+            createDefaultComponents();
+            
+            // Draw initial state
+            draw();
+            
+            // Update static compass
+            updateStaticCompass();
+            
+            // Initial vastu analysis
+            analyzeVastu();
+            
+            // Save initial state to history
+            saveToHistory();
+            
+            console.log("✅ Enhanced Vastu Architect Pro Initialized");
+        }
+        
+        // Setup canvas
+        function setupCanvas() {
+            const container = document.getElementById('canvasContainer');
+            canvas.width = container.clientWidth - 40;
+            canvas.height = container.clientHeight - 40;
+        }
+        
+        // Create initial plot - CENTERED
+        function createPlot() {
+            const plotWidthPx = plotWidth * scale;
+            const plotHeightPx = plotLength * scale;
+            
+            // Center the plot in the canvas
+            plotCenterX = canvas.width / 2;
+            plotCenterY = canvas.height / 2;
+            
+            const plot = {
+                id: 'plot',
+                type: 'plot',
+                x: plotCenterX - plotWidthPx / 2,
+                y: plotCenterY - plotHeightPx / 2,
+                width: plotWidthPx,
+                height: plotHeightPx,
+                color: '#F9FAFB',
+                stroke: '#2c3e50',
+                rotation: 0,
+                actualWidth: plotWidth,
+                actualHeight: plotLength
+            };
+            
+            objects = [plot];
+            
+            // Update area display
+            updateAreaDisplay();
+        }
+        
+        // Update plot size
+        function updatePlotSize() {
+            plotWidth = parseInt(document.getElementById('plotWidth').value) || 60;
+            plotLength = parseInt(document.getElementById('plotLength').value) || 40;
+            
+            // Update plot object
+            const plot = objects.find(obj => obj.id === 'plot');
+            if (plot) {
+                const plotWidthPx = plotWidth * scale;
+                const plotHeightPx = plotLength * scale;
+                
+                plotCenterX = canvas.width / 2;
+                plotCenterY = canvas.height / 2;
+                
+                plot.x = plotCenterX - plotWidthPx / 2;
+                plot.y = plotCenterY - plotHeightPx / 2;
+                plot.width = plotWidthPx;
+                plot.height = plotHeightPx;
+                plot.actualWidth = plotWidth;
+                plot.actualHeight = plotLength;
+                
+                // Update area display
+                updateAreaDisplay();
+                
+                // Keep components inside plot if auto-arrange is enabled
+                if (autoArrangeEnabled) {
+                    keepComponentsInsidePlot();
+                }
+                
+                draw();
+                analyzeVastu();
+                saveToHistory();
+            }
+        }
+        
+        // Update area display
+        function updateAreaDisplay() {
+            const area = plotWidth * plotLength;
+            const unit = document.getElementById('unit').value;
+            const displayArea = unit === 'meters' ? (area * 0.0929).toFixed(2) : area;
+            const unitText = unit === 'meters' ? 'sq.m' : 'sq.ft';
+            document.getElementById('totalArea').value = `${displayArea} ${unitText}`;
+        }
+        
+        // Keep components inside plot
+        function keepComponentsInsidePlot() {
+            const plot = objects.find(obj => obj.id === 'plot');
+            objects.forEach(obj => {
+                if (obj.id !== 'plot') {
+                    // Check if component is outside plot
+                    if (obj.x < plot.x) obj.x = plot.x + 10;
+                    if (obj.y < plot.y) obj.y = plot.y + 10;
+                    if (obj.x + obj.width > plot.x + plot.width) {
+                        obj.x = plot.x + plot.width - obj.width - 10;
+                    }
+                    if (obj.y + obj.height > plot.y + plot.height) {
+                        obj.y = plot.y + plot.height - obj.height - 10;
+                    }
+                }
+            });
+        }
+        
+        // Select BHK
+        function selectBHK(count) {
+            bhkCount = count;
+            
+            // Update UI
+            document.querySelectorAll('.bhk-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            document.querySelector(`.bhk-option[data-bhk="${count}"]`).classList.add('selected');
+            
+            // Update bedroom count
+            updateBedrooms();
+            
+            // Save to history
+            saveToHistory();
+        }
+        
+        // Update bedrooms based on BHK count
+        function updateBedrooms() {
+            const plot = objects.find(obj => obj.id === 'plot');
+            
+            // Remove existing bedrooms
+            objects = objects.filter(obj => !obj.type.includes('bedroom') || obj.type === 'master-bedroom');
+            
+            // Add master bedroom (always present)
+            addObject({
+                id: 'master-bedroom',
+                name: 'Master Bedroom',
+                type: 'master-bedroom',
+                x: plot.x + plot.width - 200,
+                y: plot.y + plot.height - 180,
+                width: 180,
+                height: 150,
+                color: '#4ECDC4',
+                rotation: 0
+            });
+            
+            // Add other bedrooms based on BHK count
+            for (let i = 1; i < bhkCount; i++) {
+                addObject({
+                    id: `bedroom-${i}`,
+                    name: `Bedroom ${i}`,
+                    type: 'bedroom',
+                    x: plot.x + (i * 160),
+                    y: plot.y + plot.height - 180,
+                    width: 140,
+                    height: 120,
+                    color: '#45B7D1',
+                    rotation: 0
+                });
+            }
+            
+            // Auto arrange if enabled
+            if (autoArrangeEnabled) {
+                autoArrangeComponents();
+            }
+            
+            draw();
+            analyzeVastu();
+        }
+        
+        // Add bedroom
+        function addBedroom() {
+            if (bhkCount < 5) {
+                bhkCount++;
+                selectBHK(bhkCount);
+            }
+        }
+        
+        // Remove bedroom
+        function removeBedroom() {
+            if (bhkCount > 1) {
+                bhkCount--;
+                selectBHK(bhkCount);
+            }
+        }
+        
+        // Create default components
+        function createDefaultComponents() {
+            const plot = objects.find(obj => obj.id === 'plot');
+            
+            // Add living room
+            addObject({
+                id: 'living-room',
+                name: 'Living Room',
+                type: 'living',
+                x: plot.x + 20,
+                y: plot.y + 20,
+                width: 240,
+                height: 180,
+                color: '#FF6B6B',
+                rotation: 0
+            });
+            
+            // Add kitchen
+            addObject({
+                id: 'kitchen',
+                name: 'Kitchen',
+                type: 'kitchen',
+                x: plot.x + plot.width - 180,
+                y: plot.y + 20,
+                width: 140,
+                height: 120,
+                color: '#FFD166',
+                rotation: 0
+            });
+            
+            // Add pooja room
+            addObject({
+                id: 'pooja-room',
+                name: 'Pooja Room',
+                type: 'pooja',
+                x: plot.x + 20,
+                y: plot.y + 220,
+                width: 80,
+                height: 80,
+                color: '#118AB2',
+                rotation: 0
+            });
+            
+            // Add entrance
+            entrance = {
+                id: 'entrance',
+                x: plot.x + plot.width / 2,
+                y: plot.y + 10,
+                radius: 12
+            };
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Canvas mouse events
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            canvas.addEventListener('wheel', handleWheel);
+            
+            // Touch events for mobile
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', handleTouchEnd);
+            
+            // Component drag from library
+            document.querySelectorAll('.component-item').forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('click', handleComponentClick);
+            });
+            
+            canvas.addEventListener('dragover', handleDragOver);
+            canvas.addEventListener('drop', handleDrop);
+            
+            // Keyboard events
+            document.addEventListener('keydown', handleKeyDown);
+            
+            // Window resize
+            window.addEventListener('resize', function() {
+                setupCanvas();
+                
+                // Re-center plot
+                const plot = objects.find(obj => obj.id === 'plot');
+                if (plot) {
+                    plotCenterX = canvas.width / 2;
+                    plotCenterY = canvas.height / 2;
+                    
+                    plot.x = plotCenterX - plot.width / 2;
+                    plot.y = plotCenterY - plot.height / 2;
+                }
+                
+                draw();
+            });
+        }
+        
+        // Handle component click
+        function handleComponentClick(e) {
+            const type = e.currentTarget.dataset.type;
+            addComponentAtCenter(type);
+        }
+        
+        // Add component at center
+        function addComponentAtCenter(type) {
+            const plot = objects.find(obj => obj.id === 'plot');
+            const typeConfig = objectTypes[type];
+            
+            if (!typeConfig) return;
+            
+            addObject({
+                id: `${type}-${Date.now()}`,
+                name: type.charAt(0).toUpperCase() + type.slice(1),
+                type: type,
+                x: plot.x + plot.width / 2 - (typeConfig.defaultSize.width * scale) / 2,
+                y: plot.y + plot.height / 2 - (typeConfig.defaultSize.height * scale) / 2,
+                width: typeConfig.defaultSize.width * scale,
+                height: typeConfig.defaultSize.height * scale,
+                color: typeConfig.color,
+                rotation: 0
+            });
+            
+            draw();
+            saveToHistory();
+        }
+        
+        // Set current tool
+        function setTool(tool) {
+            currentTool = tool;
+            
+            // Update UI
+            document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.tool-btn[data-tool="${tool}"]`).classList.add('active');
+            
+            // Update cursor
+            switch(tool) {
+                case 'select': canvas.style.cursor = 'default'; break;
+                case 'drag': canvas.style.cursor = 'move'; break;
+                case 'resize': canvas.style.cursor = 'nesw-resize'; break;
+                case 'rotate': canvas.style.cursor = 'grab'; break;
+                case 'entrance': canvas.style.cursor = 'crosshair'; break;
+                case 'delete': canvas.style.cursor = 'not-allowed'; break;
+            }
+        }
+        
+        // Transform point from screen to rotated plot coordinates
+        function screenToPlotCoordinates(screenX, screenY) {
+            // Convert screen coordinates to canvas coordinates
+            const canvasRect = canvas.getBoundingClientRect();
+            const canvasX = (screenX - canvasRect.left) / zoom - offsetX;
+            const canvasY = (screenY - canvasRect.top) / zoom - offsetY;
+            
+            // Get plot center
+            const plot = objects.find(obj => obj.id === 'plot');
+            if (!plot) return { x: canvasX, y: canvasY };
+            
+            const centerX = plot.x + plot.width / 2;
+            const centerY = plot.y + plot.height / 2;
+            
+            // Translate to plot center
+            let x = canvasX - centerX;
+            let y = canvasY - centerY;
+            
+            // Apply inverse rotation to get plot coordinates
+            const angle = -mapRotation * Math.PI / 180;
+            const rotatedX = x * Math.cos(angle) - y * Math.sin(angle);
+            const rotatedY = x * Math.sin(angle) + y * Math.cos(angle);
+            
+            // Translate back
+            return {
+                x: rotatedX + centerX,
+                y: rotatedY + centerY
+            };
+        }
+        
+        // Transform point from plot to screen coordinates
+        function plotToScreenCoordinates(plotX, plotY) {
+            // Get plot center
+            const plot = objects.find(obj => obj.id === 'plot');
+            if (!plot) return { x: plotX, y: plotY };
+            
+            const centerX = plot.x + plot.width / 2;
+            const centerY = plot.y + plot.height / 2;
+            
+            // Translate to plot center
+            let x = plotX - centerX;
+            let y = plotY - centerY;
+            
+            // Apply rotation to get screen coordinates
+            const angle = mapRotation * Math.PI / 180;
+            const rotatedX = x * Math.cos(angle) - y * Math.sin(angle);
+            const rotatedY = x * Math.sin(angle) + y * Math.cos(angle);
+            
+            // Translate back
+            return {
+                x: rotatedX + centerX,
+                y: rotatedY + centerY
+            };
+        }
+        
+        // Handle mouse down
+        function handleMouseDown(e) {
+            // Convert screen coordinates to plot coordinates
+            const plotCoords = screenToPlotCoordinates(e.clientX, e.clientY);
+            const x = plotCoords.x;
+            const y = plotCoords.y;
+            
+            dragStartX = x;
+            dragStartY = y;
+            
+            // Check for entrance click
+            if (entrance) {
+                const entranceScreenCoords = plotToScreenCoordinates(entrance.x, entrance.y);
+                const dist = Math.sqrt(
+                    Math.pow(e.clientX - (entranceScreenCoords.x * zoom + offsetX + canvas.getBoundingClientRect().left), 2) + 
+                    Math.pow(e.clientY - (entranceScreenCoords.y * zoom + offsetY + canvas.getBoundingClientRect().top), 2)
+                );
+                
+                if (dist < entrance.radius * zoom) {
+                    if (currentTool === 'entrance' || currentTool === 'drag') {
+                        isDragging = true;
+                        selectedObject = entrance;
+                        return;
+                    }
+                }
+            }
+            
+            // Check for object click
+            for (let i = objects.length - 1; i >= 0; i--) {
+                const obj = objects[i];
+                
+                if (obj.id === 'plot') continue;
+                
+                if (isPointInRotatedRectangle(x, y, obj)) {
+                    selectedObject = obj;
+                    
+                    if (currentTool === 'delete') {
+                        deleteObject(obj);
+                        draw();
+                        saveToHistory();
+                        return;
+                    }
+                    
+                    if (currentTool === 'resize') {
+                        isResizing = true;
+                        return;
+                    }
+                    
+                    if (currentTool === 'rotate') {
+                        isRotating = true;
+                        return;
+                    }
+                    
+                    if (currentTool === 'drag' || currentTool === 'select') {
+                        isDragging = true;
+                        return;
+                    }
+                }
+            }
+            
+            // If no object clicked and tool is entrance, add entrance
+            if (currentTool === 'entrance') {
+                const plot = objects.find(obj => obj.id === 'plot');
+                if (plot && isPointInRotatedRectangle(x, y, plot)) {
+                    entrance = {
+                        id: 'entrance',
+                        x: x,
+                        y: y,
+                        radius: 12
+                    };
+                    draw();
+                    saveToHistory();
+                }
+            }
+        }
+        
+        // Handle mouse move
+        function handleMouseMove(e) {
+            // Convert screen coordinates to plot coordinates
+            const plotCoords = screenToPlotCoordinates(e.clientX, e.clientY);
+            const x = plotCoords.x;
+            const y = plotCoords.y;
+            
+            if (isDragging && selectedObject) {
+                const dx = x - dragStartX;
+                const dy = y - dragStartY;
+                
+                if (selectedObject.id === 'entrance') {
+                    // Keep entrance inside plot
+                    const plot = objects.find(obj => obj.id === 'plot');
+                    if (plot && isPointInRotatedRectangle(x, y, plot)) {
+                        selectedObject.x += dx;
+                        selectedObject.y += dy;
+                    }
+                } else {
+                    selectedObject.x += dx;
+                    selectedObject.y += dy;
+                    
+                    // Keep component inside plot if auto-arrange is enabled
+                    if (autoArrangeEnabled) {
+                        keepComponentsInsidePlot();
+                    }
+                }
+                
+                dragStartX = x;
+                dragStartY = y;
+                
+                draw();
+                analyzeVastu();
+            }
+            
+            if (isResizing && selectedObject) {
+                const dx = x - selectedObject.x;
+                const dy = y - selectedObject.y;
+                
+                // Minimum size constraint
+                selectedObject.width = Math.max(50, Math.abs(dx));
+                selectedObject.height = Math.max(50, Math.abs(dy));
+                
+                draw();
+                analyzeVastu();
+            }
+            
+            if (isRotating && selectedObject) {
+                const centerX = selectedObject.x + selectedObject.width / 2;
+                const centerY = selectedObject.y + selectedObject.height / 2;
+                
+                const angle = Math.atan2(y - centerY, x - centerX) * (180 / Math.PI);
+                selectedObject.rotation = (angle + 360) % 360;
+                
+                draw();
+                analyzeVastu();
+            }
+        }
+        
+        // Handle mouse up
+        function handleMouseUp() {
+            if (isDragging || isResizing || isRotating) {
+                saveToHistory();
+            }
+            isDragging = false;
+            isResizing = false;
+            isRotating = false;
+        }
+        
+        // Handle wheel for zoom
+        function handleWheel(e) {
+            e.preventDefault();
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const zoomFactor = 1.1;
+            
+            if (e.deltaY < 0) {
+                // Zoom in
+                zoom *= zoomFactor;
+            } else {
+                // Zoom out
+                zoom /= zoomFactor;
+            }
+            
+            // Clamp zoom
+            zoom = Math.max(0.1, Math.min(5, zoom));
+            
+            // Adjust offset to zoom around mouse position
+            offsetX = x - (x - offsetX) * (zoom / (zoom / zoomFactor));
+            offsetY = y - (y - offsetY) * (zoom / (zoom / zoomFactor));
+            
+            draw();
+        }
+        
+        // Handle touch events
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousedown', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+        
+        function handleTouchMove(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+        
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            const mouseEvent = new MouseEvent('mouseup', {});
+            canvas.dispatchEvent(mouseEvent);
+        }
+        
+        // Handle drag from component library
+        function handleDragStart(e) {
+            const type = e.target.dataset.type;
+            e.dataTransfer.setData('componentType', type);
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            
+            // Convert screen coordinates to plot coordinates
+            const plotCoords = screenToPlotCoordinates(e.clientX, e.clientY);
+            const x = plotCoords.x;
+            const y = plotCoords.y;
+            
+            const type = e.dataTransfer.getData('componentType');
+            
+            if (type && objectTypes[type]) {
+                const plot = objects.find(obj => obj.id === 'plot');
+                const typeConfig = objectTypes[type];
+                
+                if (plot && isPointInRotatedRectangle(x, y, plot)) {
+                    addObject({
+                        id: `${type}-${Date.now()}`,
+                        name: type.charAt(0).toUpperCase() + type.slice(1),
+                        type: type,
+                        x: x - (typeConfig.defaultSize.width * scale) / 2,
+                        y: y - (typeConfig.defaultSize.height * scale) / 2,
+                        width: typeConfig.defaultSize.width * scale,
+                        height: typeConfig.defaultSize.height * scale,
+                        color: typeConfig.color,
+                        rotation: 0
+                    });
+                    
+                    draw();
+                    saveToHistory();
+                }
+            }
+        }
+        
+        // Handle keyboard events
+        function handleKeyDown(e) {
+            if (selectedObject && selectedObject.id !== 'entrance') {
+                // Delete selected object
+                if (e.key === 'Delete' || e.key === 'Backspace') {
+                    deleteObject(selectedObject);
+                    draw();
+                    saveToHistory();
+                }
+                
+                // Move with arrow keys
+                if (e.key.startsWith('Arrow')) {
+                    e.preventDefault();
+                    switch(e.key) {
+                        case 'ArrowUp': selectedObject.y -= 5; break;
+                        case 'ArrowDown': selectedObject.y += 5; break;
+                        case 'ArrowLeft': selectedObject.x -= 5; break;
+                        case 'ArrowRight': selectedObject.x += 5; break;
+                    }
+                    
+                    // Keep inside plot
+                    if (autoArrangeEnabled) {
+                        keepComponentsInsidePlot();
+                    }
+                    
+                    draw();
+                    analyzeVastu();
+                    saveToHistory();
+                }
+            }
+            
+            // Undo/Redo with Ctrl+Z/Ctrl+Y
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === 'z') {
+                    undo();
+                } else if (e.key === 'y') {
+                    redo();
+                }
+            }
+        }
+        
+        // Add object to canvas
+        function addObject(obj) {
+            objects.push(obj);
+            selectedObject = obj;
+        }
+        
+        // Delete object
+        function deleteObject(obj) {
+            const index = objects.indexOf(obj);
+            if (index > -1) {
+                objects.splice(index, 1);
+                selectedObject = null;
+                analyzeVastu();
+            }
+        }
+        
+        // Rotate map - COMPASS FRIENDLY (North is 0 degrees)
+        function rotateMap(degrees) {
+            mapRotation = parseInt(degrees) % 360;
+            
+            // Update UI
+            document.getElementById('rotationSlider').value = mapRotation;
+            document.getElementById('rotationValue').textContent = `${mapRotation}°`;
+            document.getElementById('currentRotation').textContent = `${mapRotation}°`;
+            
+            // Update static compass
+            updateStaticCompass();
+            
+            draw();
+            analyzeVastu();
+        }
+        
+        // Update static compass (always shows North at top)
+        function updateStaticCompass() {
+            const compass = document.getElementById('staticCompass');
+            const size = 100;
+            
+            // Clear compass
+            compass.innerHTML = '';
+            
+            // Create SVG compass
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', size);
+            svg.setAttribute('height', size);
+            svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
+            
+            // Draw outer circle
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', size/2);
+            circle.setAttribute('cy', size/2);
+            circle.setAttribute('r', size/2 - 5);
+            circle.setAttribute('fill', 'none');
+            circle.setAttribute('stroke', '#E5E7EB');
+            circle.setAttribute('stroke-width', '2');
+            svg.appendChild(circle);
+            
+            // Draw directions (always static, North at top)
+            const directions = [
+                { text: 'N', x: size/2, y: 15 },
+                { text: 'E', x: size - 15, y: size/2 },
+                { text: 'S', x: size/2, y: size - 15 },
+                { text: 'W', x: 15, y: size/2 }
+            ];
+            
+            directions.forEach(dir => {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', dir.x);
+                text.setAttribute('y', dir.y);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'middle');
+                text.setAttribute('fill', '#6B7280');
+                text.setAttribute('font-size', '12');
+                text.setAttribute('font-weight', 'bold');
+                text.textContent = dir.text;
+                svg.appendChild(text);
+            });
+            
+            // Draw needle pointing to current plot rotation
+            const needleAngle = mapRotation; // Needle shows plot rotation
+            
+            const needle = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            needle.setAttribute('transform', `rotate(${needleAngle} ${size/2} ${size/2})`);
+            
+            const needlePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            needlePath.setAttribute('d', `M${size/2},${size/2 - 30} L${size/2 - 6},${size/2 + 15} L${size/2 + 6},${size/2 + 15} Z`);
+            needlePath.setAttribute('fill', '#EF4444');
+            needle.appendChild(needlePath);
+            
+            const centerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            centerCircle.setAttribute('cx', size/2);
+            centerCircle.setAttribute('cy', size/2);
+            centerCircle.setAttribute('r', '3');
+            centerCircle.setAttribute('fill', '#1F2937');
+            needle.appendChild(centerCircle);
+            
+            svg.appendChild(needle);
+            compass.appendChild(svg);
+        }
+        
+        // Auto arrange components
+        function autoArrangeComponents() {
+            const plot = objects.find(obj => obj.id === 'plot');
+            if (!plot) return;
+            
+            // Remove all non-plot objects
+            objects = objects.filter(obj => obj.id === 'plot');
+            
+            // Add living room (NE corner)
+            addObject({
+                id: 'living-room',
+                name: 'Living Room',
+                type: 'living',
+                x: plot.x + 20,
+                y: plot.y + 20,
+                width: 240,
+                height: 180,
+                color: '#FF6B6B',
+                rotation: 0
+            });
+            
+            // Add kitchen (SE corner)
+            addObject({
+                id: 'kitchen',
+                name: 'Kitchen',
+                type: 'kitchen',
+                x: plot.x + plot.width - 180,
+                y: plot.y + 20,
+                width: 140,
+                height: 120,
+                color: '#FFD166',
+                rotation: 0
+            });
+            
+            // Add master bedroom (SW corner)
+            addObject({
+                id: 'master-bedroom',
+                name: 'Master Bedroom',
+                type: 'master-bedroom',
+                x: plot.x + plot.width - 200,
+                y: plot.y + plot.height - 180,
+                width: 180,
+                height: 150,
+                color: '#4ECDC4',
+                rotation: 0
+            });
+            
+            // Add other bedrooms based on BHK count
+            for (let i = 1; i < bhkCount; i++) {
+                addObject({
+                    id: `bedroom-${i}`,
+                    name: `Bedroom ${i}`,
+                    type: 'bedroom',
+                    x: plot.x + (i * 160),
+                    y: plot.y + plot.height - 180,
+                    width: 140,
+                    height: 120,
+                    color: '#45B7D1',
+                    rotation: 0
+                });
+            }
+            
+            // Add pooja room (NE corner)
+            addObject({
+                id: 'pooja-room',
+                name: 'Pooja Room',
+                type: 'pooja',
+                x: plot.x + 20,
+                y: plot.y + 220,
+                width: 80,
+                height: 80,
+                color: '#118AB2',
+                rotation: 0
+            });
+            
+            // Add bathroom (NW corner)
+            addObject({
+                id: 'bathroom',
+                name: 'Bathroom',
+                type: 'bathroom',
+                x: plot.x + 20,
+                y: plot.y + plot.height - 100,
+                width: 80,
+                height: 80,
+                color: '#45B7D1',
+                rotation: 0
+            });
+            
+            // Add staircase (S side)
+            addObject({
+                id: 'staircase',
+                name: 'Staircase',
+                type: 'staircase',
+                x: plot.x + plot.width / 2 - 50,
+                y: plot.y + plot.height - 120,
+                width: 100,
+                height: 100,
+                color: '#8B4513',
+                rotation: 0
+            });
+            
+            // Reset entrance to center of North side
+            entrance = {
+                id: 'entrance',
+                x: plot.x + plot.width / 2,
+                y: plot.y + 10,
+                radius: 12
+            };
+            
+            draw();
+            analyzeVastu();
+            saveToHistory();
+        }
+        
+        // Toggle auto arrange
+        function toggleAutoArrange() {
+            autoArrangeEnabled = !autoArrangeEnabled;
+            const btn = document.getElementById('autoArrangeBtn');
+            
+            if (autoArrangeEnabled) {
+                btn.innerHTML = '<i class="fas fa-magic"></i> Auto Arrange (ON)';
+                btn.style.background = 'var(--success)';
+            } else {
+                btn.innerHTML = '<i class="fas fa-magic"></i> Auto Arrange (OFF)';
+                btn.style.background = 'var(--warning)';
+            }
+        }
+        
+        // Enhanced Vastu Analysis with Dynamic Rule Evaluation
+        function analyzeVastu() {
+            let totalScore = 100;
+            const violations = [];
+            const warnings = [];
+            const compliances = [];
+            
+            const plot = objects.find(obj => obj.id === 'plot');
+            if (!plot) return;
+            
+            // Get entrance direction
+            let entranceDirection = null;
+            if (entrance) {
+                entranceDirection = getDirectionForPoint(entrance.x, entrance.y);
+                
+                // Analyze entrance placement
+                const entranceRules = vastuRules.entrance;
+                if (entranceRules) {
+                    const isIdeal = entranceRules.idealDirections.includes(entranceDirection);
+                    const isAvoid = entranceRules.avoidDirections.includes(entranceDirection);
+                    
+                    if (isAvoid) {
+                        totalScore -= entranceRules.weight * 2;
+                        violations.push({
+                            object: 'Main Entrance',
+                            rule: `Entrance should not face ${entranceDirection} (Avoid directions: ${entranceRules.avoidDirections.join(', ')})`,
+                            severity: 'critical',
+                            weight: entranceRules.weight * 2
+                        });
+                    } else if (!isIdeal) {
+                        totalScore -= entranceRules.weight;
+                        warnings.push({
+                            object: 'Main Entrance',
+                            rule: `Entrance ideally faces ${entranceRules.idealDirections.join(' or ')} (currently ${entranceDirection})`,
+                            severity: 'medium',
+                            weight: entranceRules.weight
+                        });
+                    } else {
+                        compliances.push({
+                            object: 'Main Entrance',
+                            rule: `Entrance correctly facing ${entranceDirection}`,
+                            severity: 'none'
+                        });
+                    }
+                }
+            }
+            
+            // Analyze each object
+            objects.forEach(obj => {
+                if (obj.id === 'plot') return;
+                
+                const direction = getDirectionForObject(obj);
+                const vastuType = obj.type === 'master-bedroom' ? 'bedroom.master' : 
+                                 obj.type === 'bedroom' ? 'bedroom.other' :
+                                 objectTypes[obj.type]?.vastuType || obj.type;
+                
+                // Get rules for this object type
+                let rules = null;
+                if (vastuType.includes('.')) {
+                    const parts = vastuType.split('.');
+                    rules = vastuRules[parts[0]] ? vastuRules[parts[0]][parts[1]] : null;
+                } else {
+                    rules = vastuRules[vastuType];
+                }
+                
+                if (rules) {
+                    const isIdeal = rules.idealDirections && rules.idealDirections.includes(direction);
+                    const isAvoid = rules.avoidDirections && rules.avoidDirections.includes(direction);
+                    
+                    // Check for adjacency issues
+                    const adjacencyIssues = checkAdjacencyIssues(obj);
+                    
+                    if (isAvoid || adjacencyIssues.length > 0) {
+                        totalScore -= rules.weight * 1.5;
+                        
+                        let ruleText = '';
+                        if (isAvoid) {
+                            ruleText = `${obj.name} should not be in ${direction} (Avoid directions: ${rules.avoidDirections.join(', ')})`;
+                        }
+                        
+                        if (adjacencyIssues.length > 0) {
+                            if (ruleText) ruleText += '. ';
+                            ruleText += `Avoid adjacency with: ${adjacencyIssues.join(', ')}`;
+                        }
+                        
+                        violations.push({
+                            object: obj.name,
+                            rule: ruleText,
+                            severity: 'high',
+                            weight: rules.weight * 1.5
+                        });
+                    } else if (!isIdeal) {
+                        totalScore -= rules.weight;
+                        warnings.push({
+                            object: obj.name,
+                            rule: `${obj.name} should be in ${rules.idealDirections.join(' or ')} (currently ${direction})`,
+                            severity: 'medium',
+                            weight: rules.weight
+                        });
+                    } else {
+                        compliances.push({
+                            object: obj.name,
+                            rule: `${obj.name} correctly placed in ${direction}`,
+                            severity: 'none'
+                        });
+                    }
+                }
+            });
+            
+            // Analyze element balance
+            const elementScore = analyzeElementBalance();
+            totalScore = (totalScore * 0.7) + (elementScore * 0.3);
+            
+            // Analyze plot proportions
+            const proportionScore = analyzePlotProportions();
+            totalScore = (totalScore * 0.8) + (proportionScore * 0.2);
+            
+            // Analyze zone balance
+            const zoneScore = analyzeZoneBalance();
+            totalScore = (totalScore * 0.9) + (zoneScore * 0.1);
+            
+            // Analyze entrance relationship with other rooms
+            if (entranceDirection) {
+                const entranceRelationshipScore = analyzeEntranceRelationships(entranceDirection);
+                totalScore = (totalScore * 0.85) + (entranceRelationshipScore * 0.15);
+            }
+            
+            // Clamp score
+            totalScore = Math.max(0, Math.min(100, Math.round(totalScore)));
+            
+            // Update UI
+            updateAnalysisUI(totalScore, violations, warnings, compliances);
+        }
+        
+        // Check adjacency issues between objects
+        function checkAdjacencyIssues(obj) {
+            const issues = [];
+            const plot = objects.find(o => o.id === 'plot');
+            
+            objects.forEach(otherObj => {
+                if (otherObj.id === 'plot' || otherObj.id === obj.id) return;
+                
+                // Calculate distance between objects
+                const objCenterX = obj.x + obj.width / 2;
+                const objCenterY = obj.y + obj.height / 2;
+                const otherCenterX = otherObj.x + otherObj.width / 2;
+                const otherCenterY = otherObj.y + otherObj.height / 2;
+                
+                const distance = Math.sqrt(
+                    Math.pow(objCenterX - otherCenterX, 2) + 
+                    Math.pow(objCenterY - otherCenterY, 2)
+                );
+                
+                // If objects are too close (adjacent)
+                if (distance < Math.max(obj.width, obj.height, otherObj.width, otherObj.height) * 0.8) {
+                    // Check for problematic adjacencies
+                    if (obj.type === 'pooja' && otherObj.type === 'bathroom') {
+                        issues.push('Bathroom (avoid near Pooja room)');
+                    }
+                    if (obj.type === 'kitchen' && otherObj.type === 'bathroom') {
+                        issues.push('Bathroom (avoid near Kitchen)');
+                    }
+                    if (obj.type === 'dining' && otherObj.type === 'bathroom') {
+                        issues.push('Bathroom (avoid near Dining)');
+                    }
+                }
+            });
+            
+            return issues;
+        }
+        
+        // Get direction for object
+        function getDirectionForObject(obj) {
+            const plot = objects.find(o => o.id === 'plot');
+            const centerX = obj.x + obj.width / 2;
+            const centerY = obj.y + obj.height / 2;
+            
+            return getDirectionForPoint(centerX, centerY);
+        }
+        
+        // Get direction for point (takes map rotation into account)
+        function getDirectionForPoint(x, y) {
+            const plot = objects.find(o => o.id === 'plot');
+            const plotCenterX = plot.x + plot.width / 2;
+            const plotCenterY = plot.y + plot.height / 2;
+            
+            // Calculate angle from plot center to point
+            const dx = x - plotCenterX;
+            const dy = y - plotCenterY;
+            
+            // Calculate angle in degrees
+            let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+            
+            // Adjust for map rotation
+            angle = (angle - mapRotation + 360) % 360;
+            
+            // Convert to compass directions (0° = North)
+            if (angle >= 337.5 || angle < 22.5) return 'N';
+            if (angle >= 22.5 && angle < 67.5) return 'NE';
+            if (angle >= 67.5 && angle < 112.5) return 'E';
+            if (angle >= 112.5 && angle < 157.5) return 'SE';
+            if (angle >= 157.5 && angle < 202.5) return 'S';
+            if (angle >= 202.5 && angle < 247.5) return 'SW';
+            if (angle >= 247.5 && angle < 292.5) return 'W';
+            return 'NW';
+        }
+        
+        // Analyze element balance
+        function analyzeElementBalance() {
+            const elements = { water: 0, fire: 0, earth: 0, air: 0, space: 0 };
+            const elementMap = {
+                'NE': 'water', 'SE': 'fire', 'SW': 'earth', 'NW': 'air'
+            };
+            
+            objects.forEach(obj => {
+                if (obj.id === 'plot') return;
+                
+                const direction = getDirectionForObject(obj);
+                if (elementMap[direction]) {
+                    elements[elementMap[direction]]++;
+                } else {
+                    elements.space++;
+                }
+            });
+            
+            // Calculate balance score
+            const total = Object.values(elements).reduce((a, b) => a + b, 0);
+            if (total === 0) return 100;
+            
+            const variance = Object.values(elements).reduce((sum, val) => {
+                return sum + Math.pow(val - (total/5), 2);
+            }, 0) / 5;
+            
+            const score = Math.max(0, Math.min(100, 100 - (variance * 20)));
+            
+            return score;
+        }
+        
+        // Analyze plot proportions
+        function analyzePlotProportions() {
+            const plot = objects.find(o => o.id === 'plot');
+            if (!plot) return 100;
+            
+            const ratio = plot.actualWidth / plot.actualHeight;
+            
+            // Ideal ratio is between 1:1 and 1:1.5
+            if (ratio >= 0.9 && ratio <= 1.1) {
+                return 100; // Square plot is ideal
+            } else if (ratio >= 0.7 && ratio <= 1.3) {
+                return 85; // Good proportion
+            } else if (ratio >= 0.5 && ratio <= 1.5) {
+                return 70; // Acceptable
+            } else if (ratio >= 0.4 && ratio <= 2) {
+                return 50; // Fair
+            } else {
+                return 30; // Poor proportion
+            }
+        }
+        
+        // Analyze zone balance
+        function analyzeZoneBalance() {
+            const zones = { N: 0, NE: 0, E: 0, SE: 0, S: 0, SW: 0, W: 0, NW: 0, Center: 0 };
+            const plot = objects.find(o => o.id === 'plot');
+            
+            objects.forEach(obj => {
+                if (obj.id === 'plot') return;
+                
+                const centerX = obj.x + obj.width / 2;
+                const centerY = obj.y + obj.height / 2;
+                const plotCenterX = plot.x + plot.width / 2;
+                const plotCenterY = plot.y + plot.height / 2;
+                
+                // Check if object is in center (within 20% of plot dimensions)
+                const isCenter = Math.abs(centerX - plotCenterX) < plot.width * 0.2 && 
+                                Math.abs(centerY - plotCenterY) < plot.height * 0.2;
+                
+                if (isCenter) {
+                    zones.Center++;
+                } else {
+                    const direction = getDirectionForObject(obj);
+                    if (zones[direction] !== undefined) {
+                        zones[direction]++;
+                    }
+                }
+            });
+            
+            // Calculate zone balance score
+            let score = 100;
+            
+            // Penalize too many objects in center
+            if (zones.Center > 1) {
+                score -= 30;
+            } else if (zones.Center > 0) {
+                score -= 15;
+            }
+            
+            // Check North-East zone (should be light and open)
+            if (zones.NE > 2) {
+                score -= 20;
+            }
+            
+            // Check South-West zone (should have heavy structures)
+            if (zones.SW < 1) {
+                score -= 10;
+            }
+            
+            return Math.max(0, Math.min(100, score));
+        }
+        
+        // Analyze entrance relationships
+        function analyzeEntranceRelationships(entranceDirection) {
+            let score = 100;
+            const plot = objects.find(o => o.id === 'plot');
+            
+            // Check if entrance is directly facing a bathroom or kitchen
+            objects.forEach(obj => {
+                if (obj.id === 'plot' || !entrance) return;
+                
+                const objDirection = getDirectionForObject(obj);
+                
+                // Entrance should not directly face bathroom or kitchen
+                if ((obj.type === 'bathroom' || obj.type === 'kitchen') && 
+                    objDirection === entranceDirection) {
+                    score -= 25;
+                }
+                
+                // Entrance should face living room ideally
+                if (obj.type === 'living' && objDirection === entranceDirection) {
+                    score += 15;
+                }
+            });
+            
+            return Math.max(0, Math.min(100, score));
+        }
+        
+        // Update analysis UI
+        function updateAnalysisUI(score, violations, warnings, compliances) {
+            document.getElementById('vastuScore').textContent = Math.round(score);
+            
+            let status = '';
+            let statusColor = '';
+            
+            if (score >= 90) {
+                status = 'Excellent - Perfect Vastu compliance';
+                statusColor = '#10B981';
+            } else if (score >= 75) {
+                status = 'Good - Minor improvements needed';
+                statusColor = '#F59E0B';
+            } else if (score >= 60) {
+                status = 'Average - Some Vastu corrections required';
+                statusColor = '#F59E0B';
+            } else if (score >= 40) {
+                status = 'Poor - Major Vastu issues found';
+                statusColor = '#EF4444';
+            } else {
+                status = 'Critical - Complete redesign suggested';
+                statusColor = '#DC2626';
+            }
+            
+            document.getElementById('vastuStatus').textContent = status;
+            document.getElementById('vastuStatus').style.color = statusColor;
+            
+            // Update rule list
+            const ruleList = document.getElementById('ruleList');
+            let html = '';
+            
+            // Show violations first
+            violations.slice(0, 5).forEach(v => {
+                const severityColor = v.severity === 'critical' ? '#DC2626' : '#EF4444';
+                html += `
+                    <div class="rule-item violation">
+                        <div class="rule-header">
+                            <strong>❌ ${v.object}</strong>
+                            <span class="rule-severity" style="background: ${severityColor}20; color: ${severityColor};">${v.severity.toUpperCase()}</span>
+                        </div>
+                        <div style="font-size: 0.9rem; margin-top: 5px;">${v.rule}</div>
+                        <div style="font-size: 0.8rem; margin-top: 5px; color: #6B7280;">
+                            Score impact: -${v.weight} points
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Then warnings
+            warnings.slice(0, 3).forEach(w => {
+                html += `
+                    <div class="rule-item warning">
+                        <div class="rule-header">
+                            <strong>⚠️ ${w.object}</strong>
+                            <span class="rule-severity" style="background: #F59E0B20; color: #D97706;">WARNING</span>
+                        </div>
+                        <div style="font-size: 0.9rem; margin-top: 5px;">${w.rule}</div>
+                        <div style="font-size: 0.8rem; margin-top: 5px; color: #6B7280;">
+                            Score impact: -${w.weight} points
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Then compliances (limited to 2)
+            compliances.slice(0, 2).forEach(c => {
+                html += `
+                    <div class="rule-item compliant">
+                        <div class="rule-header">
+                            <strong>✅ ${c.object}</strong>
+                        </div>
+                        <div style="font-size: 0.9rem; margin-top: 5px;">${c.rule}</div>
+                    </div>
+                `;
+            });
+            
+            // Add summary
+            if (violations.length === 0 && warnings.length === 0) {
+                html = `
+                    <div class="rule-item compliant">
+                        <div class="rule-header">
+                            <strong>✅ Perfect Vastu Compliance</strong>
+                        </div>
+                        <div style="font-size: 0.9rem; margin-top: 5px;">All components are properly placed according to Vastu principles</div>
+                    </div>
+                `;
+            }
+            
+            // Add rotation note if map is rotated
+            if (mapRotation !== 0) {
+                html += `
+                    <div class="rule-item warning">
+                        <div class="rule-header">
+                            <strong>🔄 Plot Rotation Applied</strong>
+                        </div>
+                        <div style="font-size: 0.9rem; margin-top: 5px;">
+                            Analysis adjusted for plot rotation of ${mapRotation}°. 
+                            All directions are relative to actual plot orientation.
+                        </div>
+                    </div>
+                `;
+            }
+            
+            ruleList.innerHTML = html;
+        }
+        
+        // Check if point is in rotated rectangle
+        function isPointInRotatedRectangle(x, y, rect) {
+            const centerX = rect.x + rect.width / 2;
+            const centerY = rect.y + rect.height / 2;
+            
+            const angle = -rect.rotation * Math.PI / 180;
+            
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+            
+            const dx = x - centerX;
+            const dy = y - centerY;
+            
+            const rotatedX = dx * cos - dy * sin;
+            const rotatedY = dx * sin + dy * cos;
+            
+            return Math.abs(rotatedX) <= rect.width / 2 && Math.abs(rotatedY) <= rect.height / 2;
+        }
+        
+        // Draw everything
+        function draw() {
+            ctx.save();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Apply zoom and offset
+            ctx.translate(offsetX * zoom, offsetY * zoom);
+            ctx.scale(zoom, zoom);
+            
+            // Draw grid if visible
+            if (gridVisible) drawGrid();
+            
+            // Draw all objects with map rotation applied to plot and components
+            ctx.save();
+            
+            // Apply map rotation around plot center
+            const plot = objects.find(o => o.id === 'plot');
+            if (plot) {
+                const centerX = plot.x + plot.width / 2;
+                const centerY = plot.y + plot.height / 2;
+                ctx.translate(centerX, centerY);
+                ctx.rotate(mapRotation * Math.PI / 180);
+                ctx.translate(-centerX, -centerY);
+                
+                // Draw plot and components with rotation
+                objects.forEach(obj => {
+                    drawObject(obj);
+                });
+                
+                // Draw entrance with rotation
+                if (entrance) drawEntrance();
+                
+                // Draw zone indicators
+                drawZoneIndicators();
+            }
+            
+            ctx.restore();
+            
+            // Draw static direction indicators (always show North at top)
+            drawStaticDirectionIndicators();
+            
+            ctx.restore();
+        }
+        
+        // Draw grid
+        function drawGrid() {
+            const gridSize = 50 * scale;
+            const dashSize = 5;
+            
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.lineWidth = 1;
+            
+            // Apply map rotation to grid
+            const plot = objects.find(o => o.id === 'plot');
+            if (plot) {
+                const centerX = plot.x + plot.width / 2;
+                const centerY = plot.y + plot.height / 2;
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(mapRotation * Math.PI / 180);
+                ctx.translate(-centerX, -centerY);
+            }
+            
+            // Vertical lines
+            for (let x = 0; x < canvas.width / zoom; x += gridSize) {
+                ctx.beginPath();
+                ctx.setLineDash([dashSize, dashSize]);
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height / zoom);
+                ctx.stroke();
+            }
+            
+            // Horizontal lines
+            for (let y = 0; y < canvas.height / zoom; y += gridSize) {
+                ctx.beginPath();
+                ctx.setLineDash([dashSize, dashSize]);
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width / zoom, y);
+                ctx.stroke();
+            }
+            
+            ctx.setLineDash([]);
+            if (plot) ctx.restore();
+        }
+        
+        // Draw object
+        function drawObject(obj) {
+            ctx.save();
+            
+            // Move to object center for rotation
+            const centerX = obj.x + obj.width / 2;
+            const centerY = obj.y + obj.height / 2;
+            
+            ctx.translate(centerX, centerY);
+            ctx.rotate(obj.rotation * Math.PI / 180);
+            
+            // Draw rectangle
+            const isSelected = selectedObject && selectedObject.id === obj.id;
+            ctx.fillStyle = obj.color + (isSelected ? 'CC' : '80');
+            ctx.fillRect(-obj.width / 2, -obj.height / 2, obj.width, obj.height);
+            
+            // Draw border
+            ctx.strokeStyle = isSelected ? '#4F46E5' : obj.color;
+            ctx.lineWidth = isSelected ? 3 : 2;
+            ctx.strokeRect(-obj.width / 2, -obj.height / 2, obj.width, obj.height);
+            
+            // Draw icon
+            const icon = objectTypes[obj.type]?.icon || '❓';
+            ctx.font = '24px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(icon, 0, 0);
+            
+            // Draw label
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#1F2937';
+            ctx.fillText(obj.name || obj.type, 0, obj.height / 2 + 15);
+            
+            // Draw dimensions
+            ctx.font = '10px Arial';
+            ctx.fillStyle = '#6B7280';
+            ctx.fillText(
+                `${Math.round(obj.width / scale)}×${Math.round(obj.height / scale)}ft`, 
+                0, 
+                obj.height / 2 + 30
+            );
+            
+            ctx.restore();
+        }
+        
+        // Draw entrance
+        function drawEntrance() {
+            ctx.save();
+            
+            ctx.fillStyle = '#10B981';
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            
+            ctx.beginPath();
+            ctx.arc(entrance.x, entrance.y, entrance.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Draw entrance icon
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🚪', entrance.x, entrance.y - 25);
+            
+            // Draw direction
+            const direction = getDirectionForPoint(entrance.x, entrance.y);
+            ctx.font = '10px Arial';
+            ctx.fillStyle = '#1F2937';
+            ctx.fillText(direction, entrance.x, entrance.y + 20);
+            
+            ctx.restore();
+        }
+        
+        // Draw zone indicators
+        function drawZoneIndicators() {
+            const plot = objects.find(o => o.id === 'plot');
+            if (!plot) return;
+            
+            const zones = ['NE', 'NW', 'SE', 'SW'];
+            const zoneColors = {
+                'NE': 'rgba(59, 130, 246, 0.1)',
+                'NW': 'rgba(139, 92, 246, 0.1)',
+                'SE': 'rgba(245, 158, 11, 0.1)',
+                'SW': 'rgba(16, 185, 129, 0.1)'
+            };
+            
+            ctx.save();
+            
+            zones.forEach(zone => {
+                ctx.fillStyle = zoneColors[zone];
+                
+                // Correctly position zones according to compass directions
+                switch(zone) {
+                    case 'NE': // Top-left quadrant
+                        ctx.fillRect(plot.x, plot.y, plot.width/2, plot.height/2);
+                        break;
+                    case 'NW': // Top-right quadrant
+                        ctx.fillRect(plot.x + plot.width/2, plot.y, plot.width/2, plot.height/2);
+                        break;
+                    case 'SE': // Bottom-left quadrant
+                        ctx.fillRect(plot.x, plot.y + plot.height/2, plot.width/2, plot.height/2);
+                        break;
+                    case 'SW': // Bottom-right quadrant
+                        ctx.fillRect(plot.x + plot.width/2, plot.y + plot.height/2, plot.width/2, plot.height/2);
+                        break;
+                }
+                
+                // Draw zone label
+                ctx.font = 'bold 14px Arial';
+                ctx.fillStyle = '#6B7280';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                let zoneX, zoneY;
+                switch(zone) {
+                    case 'NE': // Top-left quadrant
+                        zoneX = plot.x + plot.width/4;
+                        zoneY = plot.y + plot.height/4;
+                        break;
+                    case 'NW': // Top-right quadrant
+                        zoneX = plot.x + plot.width * 3/4;
+                        zoneY = plot.y + plot.height/4;
+                        break;
+                    case 'SE': // Bottom-left quadrant
+                        zoneX = plot.x + plot.width/4;
+                        zoneY = plot.y + plot.height * 3/4;
+                        break;
+                    case 'SW': // Bottom-right quadrant
+                        zoneX = plot.x + plot.width * 3/4;
+                        zoneY = plot.y + plot.height * 3/4;
+                        break;
+                }
+                
+                ctx.fillText(zone, zoneX, zoneY);
+            });
+            
+            ctx.restore();
+        }
+        
+        // Draw static direction indicators (always show North at top)
+        function drawStaticDirectionIndicators() {
+            const plot = objects.find(o => o.id === 'plot');
+            if (!plot) return;
+            
+            // Draw N, S, E, W at the border of the canvas (not plot)
+            const canvasMargin = 30;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            ctx.save();
+            
+            // Draw N indicator at top border
+            ctx.font = 'bold 20px Arial';
+            ctx.fillStyle = '#4F46E5';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('N', centerX, canvasMargin);
+            
+            // Draw S indicator at bottom border
+            ctx.fillText('S', centerX, canvas.height - canvasMargin);
+            
+            // Draw E indicator at right border
+            ctx.fillText('E', canvas.width - canvasMargin, centerY);
+            
+            // Draw W indicator at left border
+            ctx.fillText('W', canvasMargin, centerY);
+            
+            // Draw additional directional indicators
+            ctx.font = 'bold 16px Arial';
+            ctx.fillStyle = '#6B7280';
+            
+            // NE indicator
+            ctx.fillText('NE', centerX + canvas.width/4, canvasMargin + 20);
+            
+            // NW indicator
+            ctx.fillText('NW', centerX - canvas.width/4, canvasMargin + 20);
+            
+            // SE indicator
+            ctx.fillText('SE', centerX + canvas.width/4, canvas.height - canvasMargin - 20);
+            
+            // SW indicator
+            ctx.fillText('SW', centerX - canvas.width/4, canvas.height - canvasMargin - 20);
+            
+            ctx.restore();
+        }
+        
+        // Zoom in
+        function zoomIn() {
+            zoom = Math.min(5, zoom * 1.2);
+            draw();
+        }
+        
+        // Zoom out
+        function zoomOut() {
+            zoom = Math.max(0.1, zoom / 1.2);
+            draw();
+        }
+        
+        // Reset view
+        function resetView() {
+            zoom = 1;
+            offsetX = 0;
+            offsetY = 0;
+            draw();
+        }
+        
+        // Fit to screen
+        function fitToScreen() {
+            const plot = objects.find(o => o.id === 'plot');
+            if (!plot) return;
+            
+            const padding = 50;
+            const scaleX = (canvas.width - padding * 2) / plot.width;
+            const scaleY = (canvas.height - padding * 2) / plot.height;
+            zoom = Math.min(scaleX, scaleY, 2);
+            
+            offsetX = (canvas.width / zoom - plot.width) / 2 - plot.x;
+            offsetY = (canvas.height / zoom - plot.height) / 2 - plot.y;
+            
+            draw();
+        }
+        
+        // Toggle grid
+        function toggleGrid() {
+            gridVisible = !gridVisible;
+            draw();
+        }
+        
+        // Toggle report visibility
+        function toggleReport() {
+            const report = document.querySelector('.analysis-report');
+            const btnIcon = report.querySelector('.fa-chevron-down');
+            
+            if (report.style.maxHeight === '60px') {
+                report.style.maxHeight = '400px';
+                btnIcon.classList.remove('fa-chevron-up');
+                btnIcon.classList.add('fa-chevron-down');
+            } else {
+                report.style.maxHeight = '60px';
+                btnIcon.classList.remove('fa-chevron-down');
+                btnIcon.classList.add('fa-chevron-up');
+            }
+        }
+        
+        // Save to history
+        function saveToHistory() {
+            // Remove any future states if we're not at the end
+            if (historyIndex < history.length - 1) {
+                history = history.slice(0, historyIndex + 1);
+            }
+            
+            // Save current state
+            const state = {
+                objects: JSON.parse(JSON.stringify(objects)),
+                entrance: JSON.parse(JSON.stringify(entrance)),
+                bhkCount: bhkCount,
+                mapRotation: mapRotation,
+                plotWidth: plotWidth,
+                plotLength: plotLength
+            };
+            
+            history.push(state);
+            historyIndex = history.length - 1;
+            
+            // Limit history size
+            if (history.length > 50) {
+                history.shift();
+                historyIndex--;
+            }
+        }
+        
+        // Undo
+        function undo() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                loadState(history[historyIndex]);
+            }
+        }
+        
+        // Redo
+        function redo() {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                loadState(history[historyIndex]);
+            }
+        }
+        
+        // Load state
+        function loadState(state) {
+            objects = JSON.parse(JSON.stringify(state.objects));
+            entrance = JSON.parse(JSON.stringify(state.entrance));
+            bhkCount = state.bhkCount;
+            mapRotation = state.mapRotation;
+            plotWidth = state.plotWidth;
+            plotLength = state.plotLength;
+            
+            // Update UI
+            document.getElementById('plotWidth').value = plotWidth;
+            document.getElementById('plotLength').value = plotLength;
+            document.getElementById('rotationSlider').value = mapRotation;
+            document.getElementById('rotationValue').textContent = `${mapRotation}°`;
+            document.getElementById('currentRotation').textContent = `${mapRotation}°`;
+            
+            // Update BHK selection
+            document.querySelectorAll('.bhk-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            document.querySelector(`.bhk-option[data-bhk="${bhkCount}"]`).classList.add('selected');
+            
+            // Re-center plot
+            const plot = objects.find(o => o.id === 'plot');
+            if (plot) {
+                plotCenterX = canvas.width / 2;
+                plotCenterY = canvas.height / 2;
+                
+                plot.x = plotCenterX - plot.width / 2;
+                plot.y = plotCenterY - plot.height / 2;
+            }
+            
+            draw();
+            analyzeVastu();
+            updateStaticCompass();
+        }
+        
+        // Clear selection
+        function clearSelection() {
+            selectedObject = null;
+            draw();
+        }
+        
+        // Save plan
+        function savePlan() {
+            const planData = {
+                objects: objects,
+                entrance: entrance,
+                settings: {
+                    bhkCount: bhkCount,
+                    mapRotation: mapRotation,
+                    plotWidth: plotWidth,
+                    plotLength: plotLength
+                },
+                timestamp: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            const dataStr = JSON.stringify(planData);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `vastu-plan-${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            alert('Plan saved successfully!');
+        }
+        
+        // Load plan
+        function loadPlan() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = event => {
+                    try {
+                        const planData = JSON.parse(event.target.result);
+                        
+                        // Validate plan data
+                        if (!planData.objects || !planData.settings) {
+                            throw new Error('Invalid plan file format');
+                        }
+                        
+                        // Load plan
+                        objects = planData.objects;
+                        entrance = planData.entrance;
+                        bhkCount = planData.settings.bhkCount || 2;
+                        mapRotation = planData.settings.mapRotation || 0;
+                        plotWidth = planData.settings.plotWidth || 60;
+                        plotLength = planData.settings.plotLength || 40;
+                        
+                        // Update UI
+                        document.getElementById('plotWidth').value = plotWidth;
+                        document.getElementById('plotLength').value = plotLength;
+                        document.getElementById('rotationSlider').value = mapRotation;
+                        document.getElementById('rotationValue').textContent = `${mapRotation}°`;
+                        document.getElementById('currentRotation').textContent = `${mapRotation}°`;
+                        
+                        document.querySelectorAll('.bhk-option').forEach(opt => {
+                            opt.classList.remove('selected');
+                        });
+                        document.querySelector(`.bhk-option[data-bhk="${bhkCount}"]`).classList.add('selected');
+                        
+                        // Re-center plot
+                        const plot = objects.find(o => o.id === 'plot');
+                        if (plot) {
+                            plotCenterX = canvas.width / 2;
+                            plotCenterY = canvas.height / 2;
+                            
+                            plot.x = plotCenterX - plot.width / 2;
+                            plot.y = plotCenterY - plot.height / 2;
+                        }
+                        
+                        // Reset history
+                        history = [];
+                        saveToHistory();
+                        
+                        draw();
+                        analyzeVastu();
+                        updateStaticCompass();
+                        
+                        alert('Plan loaded successfully!');
+                    } catch (error) {
+                        alert('Error loading plan: ' + error.message);
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+        
+        // Export report
+        function exportReport() {
+            const score = document.getElementById('vastuScore').textContent;
+            const status = document.getElementById('vastuStatus').textContent;
+            
+            let reportText = `VASTU ARCHITECT PRO - DETAILED ANALYSIS REPORT\n`;
+            reportText += `=================================================\n\n`;
+            reportText += `PROJECT DETAILS:\n`;
+            reportText += `- Plot Size: ${plotWidth}ft × ${plotLength}ft\n`;
+            reportText += `- Total Area: ${plotWidth * plotLength} sq.ft\n`;
+            reportText += `- BHK Configuration: ${bhkCount} BHK\n`;
+            reportText += `- Plot Rotation: ${mapRotation}°\n`;
+            reportText += `- Analysis Date: ${new Date().toLocaleDateString()}\n\n`;
+            reportText += `VASTU ANALYSIS SUMMARY:\n`;
+            reportText += `- Overall Score: ${score}/100\n`;
+            reportText += `- Status: ${status}\n\n`;
+            reportText += `DETAILED ASSESSMENT:\n\n`;
+            
+            // Get all rule items
+            document.querySelectorAll('.rule-item').forEach(item => {
+                const title = item.querySelector('strong').textContent;
+                const rule = item.querySelector('div:nth-child(2)').textContent;
+                const severity = item.classList.contains('violation') ? 'VIOLATION' :
+                                item.classList.contains('warning') ? 'WARNING' : 'COMPLIANCE';
+                
+                reportText += `${severity}: ${title}\n`;
+                reportText += `   ${rule}\n\n`;
+            });
+            
+            reportText += `VASTU RECOMMENDATIONS:\n`;
+            reportText += `1. Main entrance should face North, Northeast, or East for positive energy flow\n`;
+            reportText += `2. Kitchen should be placed in Southeast or East direction\n`;
+            reportText += `3. Master bedroom should be in Southwest corner for stability\n`;
+            reportText += `4. Pooja room should be in Northeast corner for spiritual energy\n`;
+            reportText += `5. Bathrooms should be in Northwest, West, or East directions\n`;
+            reportText += `6. Living room should be in North, Northeast, or East\n`;
+            reportText += `7. Staircase should be in South, Southwest, or West\n`;
+            reportText += `8. Avoid placing heavy structures in Northeast zone\n`;
+            reportText += `9. Keep Northeast zone light and open\n`;
+            reportText += `10. Maintain balance of all five elements (Water, Fire, Earth, Air, Space)\n\n`;
+            
+            reportText += `ELEMENT BALANCE ANALYSIS:\n`;
+            const elementScore = analyzeElementBalance();
+            reportText += `- Element Balance Score: ${Math.round(elementScore)}/100\n`;
+            reportText += `- Water elements should be in Northeast\n`;
+            reportText += `- Fire elements should be in Southeast\n`;
+            reportText += `- Earth elements should be in Southwest\n`;
+            reportText += `- Air elements should be in Northwest\n\n`;
+            
+            reportText += `ZONE ANALYSIS:\n`;
+            reportText += `- North & East zones should be more open than South & West\n`;
+            reportText += `- Heavy structures should be in South & West zones\n`;
+            reportText += `- Northeast zone should be the lightest and most open\n`;
+            reportText += `- Southwest zone should have the heaviest structures\n\n`;
+            
+            reportText += `Generated by Vastu Architect Pro\n`;
+            reportText += `www.vastuarchitectpro.com\n`;
+            
+            const blob = new Blob([reportText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `vastu-report-${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
