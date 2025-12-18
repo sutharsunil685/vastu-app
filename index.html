@@ -2497,49 +2497,51 @@
         }
         
         // Draw everything
-        function draw() {
-            ctx.save();
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Apply zoom and offset
-            ctx.translate(offsetX * zoom, offsetY * zoom);
-            ctx.scale(zoom, zoom);
-            
-            // Draw grid if visible
-            if (gridVisible) drawGrid();
-            
-            // Draw all objects with map rotation applied to plot and components
-            ctx.save();
-            
-            // Apply map rotation around plot center
-            const plot = objects.find(o => o.id === 'plot');
-            if (plot) {
-                const centerX = plot.x + plot.width / 2;
-                const centerY = plot.y + plot.height / 2;
-                ctx.translate(centerX, centerY);
-                ctx.rotate(mapRotation * Math.PI / 180);
-                ctx.translate(-centerX, -centerY);
-                
-                // Draw plot and components with rotation
-                objects.forEach(obj => {
-                    drawObject(obj);
-                });
-                
-                // Draw entrance with rotation
-                if (entrance) drawEntrance();
-                
-                // Draw zone indicators
-                drawZoneIndicators();
-            }
-            
-            ctx.restore();
-            
-            // Draw static direction indicators (always show North at top)
-            drawStaticDirectionIndicators();
-            
-            ctx.restore();
-        }
+        // Draw everything
+// Draw everything
+function draw() {
+    // Clear the entire canvas
+    ctx.save();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Apply zoom and pan
+    ctx.translate(offsetX * zoom, offsetY * zoom);
+    ctx.scale(zoom, zoom);
+    
+    // Draw the grid if it's visible
+    if (gridVisible) drawGrid();
+    
+    // This context is for the rotating plot and its components
+    ctx.save();
+    
+    // Get the plot object to find its center
+    const plot = objects.find(o => o.id === 'plot');
+    if (plot) {
+        const centerX = plot.x + plot.width / 2;
+        const centerY = plot.y + plot.height / 2;
         
+        // Apply the map rotation transformation
+        ctx.translate(centerX, centerY);
+        ctx.rotate(mapRotation * Math.PI / 180);
+        ctx.translate(-centerX, -centerY);
+        
+        // Draw all objects (plot, components, entrance) within this rotated context
+        objects.forEach(obj => {
+            drawObject(obj);
+        });
+        
+        if (entrance) drawEntrance();
+    }
+    
+    // Restore the state to remove the rotation
+    ctx.restore();
+    
+    // Draw the static direction indicators on top of everything
+    drawStaticDirectionIndicators();
+    
+    // Restore the initial state (removes zoom/pan)
+    ctx.restore();
+}
         // Draw grid
         function drawGrid() {
             const gridSize = 50 * scale;
@@ -2582,50 +2584,65 @@
         }
         
         // Draw object
-        function drawObject(obj) {
-            ctx.save();
-            
-            // Move to object center for rotation
-            const centerX = obj.x + obj.width / 2;
-            const centerY = obj.y + obj.height / 2;
-            
-            ctx.translate(centerX, centerY);
-            ctx.rotate(obj.rotation * Math.PI / 180);
-            
-            // Draw rectangle
-            const isSelected = selectedObject && selectedObject.id === obj.id;
-            ctx.fillStyle = obj.color + (isSelected ? 'CC' : '80');
-            ctx.fillRect(-obj.width / 2, -obj.height / 2, obj.width, obj.height);
-            
-            // Draw border
-            ctx.strokeStyle = isSelected ? '#4F46E5' : obj.color;
-            ctx.lineWidth = isSelected ? 3 : 2;
-            ctx.strokeRect(-obj.width / 2, -obj.height / 2, obj.width, obj.height);
-            
-            // Draw icon
-            const icon = objectTypes[obj.type]?.icon || '❓';
-            ctx.font = '24px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(icon, 0, 0);
-            
-            // Draw label
-            ctx.font = '12px Arial';
-            ctx.fillStyle = '#1F2937';
-            ctx.fillText(obj.name || obj.type, 0, obj.height / 2 + 15);
-            
-            // Draw dimensions
-            ctx.font = '10px Arial';
-            ctx.fillStyle = '#6B7280';
-            ctx.fillText(
-                `${Math.round(obj.width / scale)}×${Math.round(obj.height / scale)}ft`, 
-                0, 
-                obj.height / 2 + 30
-            );
-            
-            ctx.restore();
-        }
+       // Draw object
+function drawObject(obj) {
+    ctx.save();
+    
+    // Special handling for plot object - don't apply individual rotation
+    if (obj.id === 'plot') {
+        // Draw rectangle without individual rotation (since plot is already rotated in draw function)
+        ctx.fillStyle = obj.color;
+        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
         
+        // Draw border
+        ctx.strokeStyle = obj.stroke;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(obj.x, obj.y, obj.width, obj.height);
+        
+        ctx.restore();
+        return;
+    }
+    
+    // For all other objects, apply individual rotation
+    const centerX = obj.x + obj.width / 2;
+    const centerY = obj.y + obj.height / 2;
+    
+    ctx.translate(centerX, centerY);
+    ctx.rotate(obj.rotation * Math.PI / 180);
+    
+    // Draw rectangle
+    const isSelected = selectedObject && selectedObject.id === obj.id;
+    ctx.fillStyle = obj.color + (isSelected ? 'CC' : '80');
+    ctx.fillRect(-obj.width / 2, -obj.height / 2, obj.width, obj.height);
+    
+    // Draw border
+    ctx.strokeStyle = isSelected ? '#4F46E5' : obj.color;
+    ctx.lineWidth = isSelected ? 3 : 2;
+    ctx.strokeRect(-obj.width / 2, -obj.height / 2, obj.width, obj.height);
+    
+    // Draw icon
+    const icon = objectTypes[obj.type]?.icon || '❓';
+    ctx.font = '24px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(icon, 0, 0);
+    
+    // Draw label
+    ctx.font = '12px Arial';
+    ctx.fillStyle = '#1F2937';
+    ctx.fillText(obj.name || obj.type, 0, obj.height / 2 + 15);
+    
+    // Draw dimensions
+    ctx.font = '10px Arial';
+    ctx.fillStyle = '#6B7280';
+    ctx.fillText(
+        `${Math.round(obj.width / scale)}×${Math.round(obj.height / scale)}ft`, 
+        0, 
+        obj.height / 2 + 30
+    );
+    
+    ctx.restore();
+}
         // Draw entrance
         function drawEntrance() {
             ctx.save();
@@ -2655,23 +2672,24 @@
         }
         
         // Draw zone indicators
-        function drawZoneIndicators() {
-            const plot = objects.find(o => o.id === 'plot');
-            if (!plot) return;
-            
-            const zones = ['NE', 'NW', 'SE', 'SW'];
-            const zoneColors = {
-                'NE': 'rgba(59, 130, 246, 0.1)',
-                'NW': 'rgba(139, 92, 246, 0.1)',
-                'SE': 'rgba(245, 158, 11, 0.1)',
-                'SW': 'rgba(16, 185, 129, 0.1)'
-            };
-            
-            ctx.save();
-            
+        // Draw zone indicators
+function drawZoneIndicators() {
+    const plot = objects.find(o => o.id === 'plot');
+    if (!plot) return;
+    
+    const zones = ['NE', 'NW', 'SE', 'SW'];
+    const zoneColors = {
+        'NE': 'rgba(59, 130, 246, 0.1)',
+        'NW': 'rgba(139, 92, 246, 0.1)',
+        'SE': 'rgba(245, 158, 11, 0.1)',
+        'SW': 'rgba(16, 185, 129, 0.1)'
+    };
+    
+    ctx.save();
+    
             zones.forEach(zone => {
                 ctx.fillStyle = zoneColors[zone];
-                
+    
                 // Correctly position zones according to compass directions
                 switch(zone) {
                     case 'NE': // Top-left quadrant
@@ -2687,13 +2705,13 @@
                         ctx.fillRect(plot.x + plot.width/2, plot.y + plot.height/2, plot.width/2, plot.height/2);
                         break;
                 }
-                
-                // Draw zone label
-                ctx.font = 'bold 14px Arial';
-                ctx.fillStyle = '#6B7280';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                
+    
+    // Draw zone labels
+    ctx.font = 'bold 14px Arial';
+    ctx.fillStyle = '#6B7280';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
                 let zoneX, zoneY;
                 switch(zone) {
                     case 'NE': // Top-left quadrant
@@ -2716,57 +2734,89 @@
                 
                 ctx.fillText(zone, zoneX, zoneY);
             });
-            
-            ctx.restore();
-        }
+    
+    ctx.restore();
+}
         
         // Draw static direction indicators (always show North at top)
-        function drawStaticDirectionIndicators() {
-            const plot = objects.find(o => o.id === 'plot');
-            if (!plot) return;
-            
-            // Draw N, S, E, W at the border of the canvas (not plot)
-            const canvasMargin = 30;
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            
-            ctx.save();
-            
-            // Draw N indicator at top border
-            ctx.font = 'bold 20px Arial';
-            ctx.fillStyle = '#4F46E5';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('N', centerX, canvasMargin);
-            
-            // Draw S indicator at bottom border
-            ctx.fillText('S', centerX, canvas.height - canvasMargin);
-            
-            // Draw E indicator at right border
-            ctx.fillText('E', canvas.width - canvasMargin, centerY);
-            
-            // Draw W indicator at left border
-            ctx.fillText('W', canvasMargin, centerY);
-            
-            // Draw additional directional indicators
-            ctx.font = 'bold 16px Arial';
-            ctx.fillStyle = '#6B7280';
-            
-            // NE indicator
-            ctx.fillText('NE', centerX + canvas.width/4, canvasMargin + 20);
-            
-            // NW indicator
-            ctx.fillText('NW', centerX - canvas.width/4, canvasMargin + 20);
-            
-            // SE indicator
-            ctx.fillText('SE', centerX + canvas.width/4, canvas.height - canvasMargin - 20);
-            
-            // SW indicator
-            ctx.fillText('SW', centerX - canvas.width/4, canvas.height - canvasMargin - 20);
-            
-            ctx.restore();
-        }
+        // Draw zone indicators - REMOVED as it was incorrectly coloring the inner plot
+        // function drawZoneIndicators() { ... }
+
+        // Draw static direction indicators with colored regions
+        // Draw static direction indicators with colored regions
+// Draw static direction indicators with colored regions
+function drawStaticDirectionIndicators() {
+    const plot = objects.find(o => o.id === 'plot');
+    if (!plot) return;
+    
+    // Define colors for each direction
+    const directionColors = {
+        'N': 'rgba(59, 130, 246, 0.1)',      // Blue for North
+        'NE': 'rgba(59, 130, 246, 0.2)',     // Lighter Blue for Northeast
+        'E': 'rgba(34, 197, 94, 0.1)',      // Green for East
+        'SE': 'rgba(245, 158, 11, 0.2)',     // Orange for Southeast
+        'S': 'rgba(239, 68, 68, 0.1)',       // Red for South
+        'SW': 'rgba(16, 185, 129, 0.2)',     // Teal for Southwest
+        'W': 'rgba(139, 92, 246, 0.1)',      // Purple for West
+        'NW': 'rgba(139, 92, 246, 0.2)'      // Lighter Purple for Northwest
+    };
+    
+    // Calculate the plot center
+    const plotCenterX = plot.x + plot.width / 2;
+    const plotCenterY = plot.y + plot.height / 2;
+    
+    // Calculate the radius for the outer direction indicators
+    const maxDimension = Math.max(plot.width, plot.height);
+    const outerRadius = maxDimension * 0.8;
+    const innerRadius = maxDimension * 0.55;
+    
+    ctx.save();
+    
+    // Draw colored sectors for each direction
+    const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    const angleStep = Math.PI / 4; // 45 degrees for each sector
+    
+    directions.forEach((direction, index) => {
+        const startAngle = index * angleStep - Math.PI / 2 - angleStep / 2; // Start from North
+        const endAngle = startAngle + angleStep;
         
+        ctx.fillStyle = directionColors[direction];
+        ctx.beginPath();
+        ctx.moveTo(plotCenterX, plotCenterY);
+        ctx.arc(plotCenterX, plotCenterY, outerRadius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Draw the inner circle to create a ring effect
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(plotCenterX, plotCenterY, innerRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+    });
+    
+    // Draw direction labels
+    ctx.font = 'bold 16px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    directions.forEach((direction, index) => {
+        const angle = index * angleStep - Math.PI / 2; // Start from North
+        const labelRadius = (outerRadius + innerRadius) / 2;
+        const labelX = plotCenterX + Math.cos(angle) * labelRadius;
+        const labelY = plotCenterY + Math.sin(angle) * labelRadius;
+        
+        ctx.fillStyle = '#1F2937';
+        ctx.fillText(direction, labelX, labelY);
+    });
+    
+    // --- THE FIX IS HERE ---
+    // REMOVE the redundant plot border drawing.
+    // The plot border is already drawn correctly by the drawObject function
+    // within the rotated context in the main draw() loop.
+    
+    ctx.restore();
+}  
         // Zoom in
         function zoomIn() {
             zoom = Math.min(5, zoom * 1.2);
